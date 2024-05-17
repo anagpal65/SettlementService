@@ -3,7 +3,7 @@
 
  Requiremnt : accepts up to 4 simultaneous settlements was a bit confusing
  The requirement seems unclear. Assuming that the service should accept up to 4 bookings at the same time.
- As in if the time is passed to make a booking, with that hour, the service should accept up to 4 bookings.
+ As in if the time is passed to make a booking, within that hour, the service should accept up to 4 bookings.
 
  https://localhost:7200/swagger/index.html
 
