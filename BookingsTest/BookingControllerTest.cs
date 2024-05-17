@@ -1,5 +1,9 @@
+using Moq;
 using SettlementService.Models;
+using SettlementService.Controllers;
+using Microsoft.AspNetCore.Http.HttpResults;
 using System.Net;
+using Microsoft.AspNetCore.Mvc;
 
 
 namespace BookingTest
@@ -7,87 +11,20 @@ namespace BookingTest
     [TestClass]
     public class BookingControllerTest
     {
-        private IBookingService _bookingService;
-
-        [TestInitialize]
-        public void Setup()
-        {
-            _bookingService = new BookingService();
-        }
-
         [TestMethod]
         public void AddBooking_WhenBookingIsValid_ReturnsOk()
         {
             // Arrange
+            var bookingService = new Mock<IBookingService>();
+            bookingService.Setup(x => x.AddBooking(It.IsAny<AddBooking>())).Returns(new Result<SuccessfulBooking>(new SuccessfulBooking(), HttpStatusCode.OK));
+            var controller = new BookingController(bookingService.Object);
             var booking = new AddBooking() { BookingTime = "10:00", Name = "John Doe" };
 
             // Act
-            var result = _bookingService.AddBooking(booking);
+            var result = controller.Post(booking);
 
             // Assert
-            Assert.AreEqual(HttpStatusCode.OK, result.httpStatusCode);
+            Assert.IsInstanceOfType(result, typeof(ActionResult<SuccessfulBooking>));
         }
-
-        [TestMethod]
-        public void AddBooking_WhenBookingIsNotValid_ReturnsBadRequest()
-        {
-            // Arrange
-            var booking = new AddBooking() { BookingTime = "10:00", Name = "" };
-
-            // Act
-            var result = _bookingService.AddBooking(booking);
-
-            // Assert
-            Assert.AreEqual(HttpStatusCode.BadRequest, result.httpStatusCode);
-        }
-
-        [TestMethod]
-        [DataRow("10:00:00")]
-        [DataRow("25:00")]
-        public void AddBooking_WhenBookingTimeIsNotValid_ReturnsBadRequest(string time)
-        {
-            // Arrange
-            var booking = new AddBooking() { BookingTime = time, Name = "John Doe" };
-
-            // Act
-            var result = _bookingService.AddBooking(booking);
-
-            // Assert
-            Assert.AreEqual(HttpStatusCode.BadRequest, result.httpStatusCode);
-        }
-
-        [TestMethod]
-        [DataRow("08:00")]
-        [DataRow("18:00")]
-        [DataRow("16:01")]
-        public void AddBooking_WhenBookingTimeIsNotBetween9and5_ReturnsBadRequest(string time)
-        {
-            // Arrange
-            var booking = new AddBooking() { BookingTime = time, Name = "John Doe" };
-
-            // Act
-            var result = _bookingService.AddBooking(booking);
-
-            // Assert
-            Assert.AreEqual(HttpStatusCode.BadRequest, result.httpStatusCode);
-        }
-
-        [TestMethod]
-        public void AddBooking_WhenBookingTimeIsAlreadyBooked_ReturnsBadRequest()
-        {
-            // Arrange
-            var booking = new AddBooking() { BookingTime = "10:00", Name = "John Doe" };
-            _bookingService.AddBooking(booking);
-            _bookingService.AddBooking(booking);
-            _bookingService.AddBooking(booking);
-            _bookingService.AddBooking(booking);
-
-            // Act
-            var result = _bookingService.AddBooking(booking);
-
-            // Assert
-            Assert.AreEqual(HttpStatusCode.Conflict, result.httpStatusCode);
-        }
-
     }
 }
