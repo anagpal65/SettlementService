@@ -1,0 +1,6 @@
+@SettlementService_HostAddress = http://localhost:5181
+
+GET {{SettlementService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
